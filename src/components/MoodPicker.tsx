@@ -1,7 +1,11 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 
 import { MoodOptionType } from "../types";
+import { theme } from "../theme";
+import { PressableArea } from "./PressableArea";
+
+const imageSrc = require('../../assets/butterflies.png');
 
 const moodOptions: MoodOptionType[] = [
     { emoji: '🧑‍💻', description: 'studious' },
@@ -11,31 +15,66 @@ const moodOptions: MoodOptionType[] = [
     { emoji: '😤', description: 'frustrated' },
 ];
 
-export const MoodPicker: React.FC = () => {
+type MoodPickerProps = {
+    handleSelectMood: (moodOption: MoodOptionType) => void;
+}
+
+export const MoodPicker: React.FC<MoodPickerProps> = ({ handleSelectMood }) => {
 
     const [selectedMood, setSelectedMood] = useState<MoodOptionType>();
+    const [hasSelected, setHasSelected] = useState<boolean>(false);
+
+    const handleSelect = useCallback(() => {
+        if (selectedMood) {
+            handleSelectMood(selectedMood);
+            setSelectedMood(undefined);
+            setHasSelected(true);
+        }
+    }, [handleSelectMood, selectedMood]);
+
+    if (hasSelected) {
+        return (
+            <View style={styles.container}>
+                <Image
+                    style={styles.image}
+                    source={imageSrc} />
+                <PressableArea style={styles.button}
+                    onPress={() => setHasSelected(false)}>
+                    <Text style={styles.buttonText}>Choose Another</Text>
+                </PressableArea>
+            </View>
+        )
+    }
+
+
 
     return (
-        <View style={styles.moodOptions}>
-            {moodOptions.map(option => (
-                <View>
+        <View style={styles.container}>
+            <Text style={styles.heading}>How Are You Right Now?</Text>
+            <View style={styles.moodOptions}>
+                {moodOptions.map(option => (
+                    <View key={option.emoji}>
 
-                    <Pressable
-                        key={option.emoji}
-                        onPress={() => setSelectedMood(option)}
-                        style={[styles.moodItem, selectedMood?.emoji === option.emoji ? styles.selectedMoodItem : undefined]}
-                    >
-                        <Text>{option.emoji}</Text>
-                    </Pressable>
-                    <Text style={styles.descriptionText}>
-                        {option.emoji === selectedMood?.emoji
-                            ? option.description
-                            : undefined}
-                    </Text>
-                </View>
-            )
-            )}
-        </View>
+                        <Pressable
+                            onPress={() => setSelectedMood(option)}
+                            style={[styles.moodItem, selectedMood?.emoji === option.emoji ? styles.selectedMoodItem : undefined]}
+                        >
+                            <Text>{option.emoji}</Text>
+                        </Pressable>
+                        <Text style={styles.descriptionText}>
+                            {option.emoji === selectedMood?.emoji
+                                ? option.description
+                                : undefined}
+                        </Text>
+                    </View>
+                )
+                )}
+            </View>
+            <PressableArea style={styles.button}
+                onPress={handleSelect}>
+                <Text style={styles.buttonText}>Choose</Text>
+            </PressableArea>
+        </View >
     )
 };
 
@@ -65,5 +104,37 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         fontSize: 10,
+    },
+    container: {
+        borderWidth: 2,
+        borderColor: theme.colorPurple,
+        margin: 10,
+        borderRadius: 10,
+        padding: 20,
+        backgroundColor: 'rgba(0,0,0,0.2)'
+    },
+    heading: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+        textAlign: 'center',
+        marginBottom: 20,
+        color: theme.colorWhite
+    },
+    button: {
+        backgroundColor: theme.colorPurple,
+        width: 150,
+        borderRadius: 20,
+        marginTop: 20,
+        alignSelf: 'center',
+        padding: 10,
+    },
+    buttonText: {
+        color: theme.colorWhite,
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
+    image: {
+        alignSelf: 'center',
     }
 })
