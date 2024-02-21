@@ -1,9 +1,12 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image, useWindowDimensions } from "react-native";
 
 import { MoodOptionType } from "../types";
 import { theme } from "../theme";
 import { PressableArea } from "./PressableArea";
+import Reanimated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+
+const ReanimatedPressable = Reanimated.createAnimatedComponent(Pressable);
 
 const imageSrc = require('../../assets/butterflies.png');
 
@@ -21,8 +24,14 @@ type MoodPickerProps = {
 
 export const MoodPicker: React.FC<MoodPickerProps> = ({ handleSelectMood }) => {
 
+    const dimensions = useWindowDimensions(); //Gives width and height of window
     const [selectedMood, setSelectedMood] = useState<MoodOptionType>();
     const [hasSelected, setHasSelected] = useState<boolean>(false);
+
+    const buttonStyle = useAnimatedStyle(() => ({
+        opacity: selectedMood ? withTiming(1) : withTiming(0.5),
+        transform: [{ scale: selectedMood ? withTiming(1) : withTiming(0.8) }]
+    }), [selectedMood]);
 
     const handleSelect = useCallback(() => {
         if (selectedMood) {
@@ -38,14 +47,13 @@ export const MoodPicker: React.FC<MoodPickerProps> = ({ handleSelectMood }) => {
                 <Image
                     style={styles.image}
                     source={imageSrc} />
-                <PressableArea style={styles.button}
+                <Pressable style={[styles.button]}
                     onPress={() => setHasSelected(false)}>
                     <Text style={styles.buttonText}>Choose Another</Text>
-                </PressableArea>
+                </Pressable>
             </View>
         )
     }
-
 
 
     return (
@@ -70,10 +78,10 @@ export const MoodPicker: React.FC<MoodPickerProps> = ({ handleSelectMood }) => {
                 )
                 )}
             </View>
-            <PressableArea style={styles.button}
+            <ReanimatedPressable style={[buttonStyle, styles.button]}
                 onPress={handleSelect}>
                 <Text style={styles.buttonText}>Choose</Text>
-            </PressableArea>
+            </ReanimatedPressable>
         </View >
     )
 };
@@ -82,7 +90,7 @@ const styles = StyleSheet.create({
     moodOptions: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 10,
+
     },
     moodItem: {
         width: 60,
@@ -90,49 +98,49 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 30,
-        marginBottom: 5,
         borderColor: 'white',
-        borderWidth: 2,
+        borderWidth: 0.2,
+        marginBottom: 5,
     },
     selectedMoodItem: {
-        borderWidth: 2,
+        // borderWidth: 2,
         backgroundColor: '#454C73',
         borderColor: '#fff',
     },
     descriptionText: {
-        color: '#454C73',
-        fontWeight: 'bold',
+        color: theme.colorPurple,
         textAlign: 'center',
         fontSize: 10,
+        fontFamily: theme.fontFamilyBold,
     },
     container: {
+        height: 250,
         borderWidth: 2,
         borderColor: theme.colorPurple,
         margin: 10,
         borderRadius: 10,
         padding: 20,
-        backgroundColor: 'rgba(0,0,0,0.2)'
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        justifyContent: 'space-between',
     },
     heading: {
         fontSize: 20,
-        fontWeight: 'bold',
         letterSpacing: 1,
         textAlign: 'center',
-        marginBottom: 20,
-        color: theme.colorWhite
+        color: theme.colorWhite,
+        fontFamily: theme.fontFamilyBold,
     },
     button: {
         backgroundColor: theme.colorPurple,
         width: 150,
         borderRadius: 20,
-        marginTop: 20,
         alignSelf: 'center',
         padding: 10,
     },
     buttonText: {
         color: theme.colorWhite,
         textAlign: 'center',
-        fontWeight: 'bold',
+        fontFamily: theme.fontFamilyBold,
     },
     image: {
         alignSelf: 'center',
